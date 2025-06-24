@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Szachowy Asystent z Kamerą</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Glass_chess_set.jpg/1024px-Glass_chess_set.jpg');
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      text-shadow: 1px 1px 3px #000;
+    }
+    video {
+      border: 2px solid #fff;
+      width: 60%;
+      margin-top: 20px;
+    }
+    input {
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 5px;
+      width: 80%;
+    }
+    #output {
+      margin-top: 15px;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.5);
+      display: inline-block;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Szachowy Asystent</h1>
+  <video id="camera" autoplay playsinline></video><br>
+  <p>Aktualna pozycja FEN:</p>
+  <input type="text" id="fenInput" value="r1bqkbnr/pppppppp/n7/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2" />
+  <div id="output">Najlepszy ruch: ...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js"></script>
+  <script>
+    // Inicjalizacja kamery
+    const video = document.getElementById('camera');
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    }).catch(err => {
+      alert("Nie można uzyskać dostępu do kamery: " + err);
+    });
+
+    // Inicjalizacja silnika Stockfish
+    const engine = new Worker("https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js");
+    engine.postMessage("uci");
+
+    let lastFen = "";
+    const fenInput = document.getElementById("fenInput");
+    const output = document.getElementById("output");
+
+    function analyzeFen(fen) {
+      engine.postMessage("ucinewgame");
+      engine.postMessage("position fen " + fen);
+      engine.postMessage("go depth 15");
+    }
+
+    engine.onmessage = function(event) {
+      if (typeof event.data === "string" && event.data.startsWith("bestmove")) {
+        const move = event.data.split(" ")[1];
+        output.innerText = "Najlepszy ruch: " + move;
+      }
+    };
+
+    // Automatyczne sprawdzanie FEN co 2 sekundy
+    setInterval(() => {
+      const currentFen = fenInput.value.trim();
+      if (currentFen && currentFen !== lastFen) {
+        lastFen = currentFen;
+        output.innerText = "Analizuję...";
+        analyzeFen(currentFen);
+      }
+    }, 200
+
+Jasne! Poniżej znajdziesz **kompletny kod HTML**, który możesz:
+
+- zapisać jako plik `index.html`,
+- wrzucić do repozytorium na GitHub (np. `szachowy-asystent`),
+- a następnie opublikować za pomocą **GitHub Pages** (w ustawieniach repozytorium włącz GitHub Pages → Branch `main`, folder `/root` lub `/docs`).
+
+---
+
+### ✅ **Pełny plik `index.html`**:
+
+```html
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Szachowy Asystent z Kamerą</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Glass_chess_set.jpg/1024px-Glass_chess_set.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #fff;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    h1 {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      margin: 0;
+    }
+
+    video {
+      border: 2px solid #fff;
+      width: 60%;
+      margin-top: 20px;
+    }
+
+    input {
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 10px;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.6);
+      display: inline-block;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Szachowy Asystent</h1>
+
+  <video id="camera" autoplay playsinline></video><br>
+
+  <p>Aktualna pozycja FEN:</p>
+  <input type="text" id="fenInput" value="r1bqkbnr/pppppppp/n7/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2" />
+
+  <div id="output">Najlepszy ruch: ...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js"></script>
+  <script>
+    // Włączenie kamery
+    const video = document.getElementById('camera');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Nie można uzyskać dostępu do kamery: " + err);
+      });
+
+    // Inicjalizacja silnika Stockfish
+    const engine = new Worker("https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js");
+    engine.postMessage("uci");
+
+    const fenInput = document.getElementById("fenInput");
+    const output = document.getElementById("output");
+
+    let lastFen = "";
+
+    function analyzeFen(fen) {
+      engine.postMessage("ucinewgame");
+      engine.postMessage("position fen " + fen);
+      engine.postMessage("go depth 15");
+    }
+
+    engine.onmessage = function(event) {
+      if (typeof event.data === "string" && event.data.startsWith("bestmove")) {
+        const move = event.data.split(" ")[1];
+        output.innerText = "Najlepszy ruch: " + move;
+      }
+    };
+
+    // Sprawdzaj automatycznie FEN co 2 sekundy
+    setInterval(() => {
+      const currentFen = fenInput.value.trim();
+      if (currentFen && currentFen !== lastFen) {
+        lastFen = currentFen;
+        output.innerText = "Analizuję...";
+        analyzeFen(currentFen);
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
