@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Szachowy Asystent z Kamerą</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f0f0f0; }
+    video { border: 2px solid #000; width: 60%; }
+    input, button { font-size: 16px; margin-top: 10px; padding: 5px; }
+    #output { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Szachowy Asystent</h1>
+  <video id="camera" autoplay playsinline></video><br>
+  <p>Wprowadź FEN pozycji szachowej:</p>
+  <input type="text" id="fenInput" size="80" value="r1bqkbnr/pppppppp/n7/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2" />
+  <button onclick="analyze()">Analizuj ruch</button>
+  <div id="output">Najlepszy ruch: ...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js"></script>
+  <script>
+    // Kamera
+    const video = document.getElementById('camera');
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    }).catch(err => {
+      alert("Nie można uzyskać dostępu do kamery: " + err);
+    });
+
+    // Stockfish
+    const engine = new Worker("https://cdn.jsdelivr.net/npm/stockfish/stockfish.wasm.js");
+    function analyze() {
+      const fen = document.getElementById("fenInput").value;
+      document.getElementById("output").innerText = "Analizuję...";
+      engine.postMessage("uci");
+      engine.postMessage("isready");
+      engine.postMessage("ucinewgame");
+      engine.postMessage("position fen " + fen);
+      engine.postMessage("go depth 20");
+    }
+
+    engine.onmessage = function(event) {
+      if (typeof event.data === "string" && event.data.startsWith("bestmove")) {
+        const move = event.data.split(" ")[1];
+        document.getElementById("output").innerText = "Najlepszy ruch: " + move;
+      }
+    };
+  </script>
+</body>
+</html>
